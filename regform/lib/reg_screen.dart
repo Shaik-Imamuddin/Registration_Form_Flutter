@@ -4,12 +4,14 @@ class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
 
   @override
-  State<RegistrationScreen> createState() => _RegistrationScreenState();
+  State<RegistrationScreen> createState() => RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   String message = "";
   Color messageColor = Colors.red;
@@ -17,8 +19,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void register() {
     String name = nameController.text.trim();
     String email = emailController.text.trim();
+    String phone = phoneController.text.trim();
+    String password = passwordController.text.trim();
 
-    if (name.isEmpty || email.isEmpty) {
+    if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
       setState(() {
         message = "All fields are required.";
         messageColor = Colors.red;
@@ -33,6 +37,36 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     nameController.clear();
     emailController.clear();
+    phoneController.clear();
+    passwordController.clear();
+  }
+
+  Widget buildInput({
+    required String label,
+    required TextEditingController controller,
+    bool isPassword = false,
+    TextInputType type = TextInputType.text,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        SizedBox(height: 5),
+        TextField(
+          controller: controller,
+          obscureText: isPassword,
+          keyboardType: type,
+          decoration: InputDecoration(
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
+        ),
+        SizedBox(height: 15),
+      ],
+    );
   }
 
   @override
@@ -79,36 +113,30 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
 
               SizedBox(height: 10),
-
-              Text("Name"),
-              SizedBox(height: 5),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
+              buildInput(
+                  label: "Name",
+                  controller: nameController,
                 ),
-              ),
 
-              SizedBox(height: 15),
-
-              Text("Email"),
-              SizedBox(height: 5),
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
+                buildInput(
+                  label: "Email",
+                  controller: emailController,
+                  type: TextInputType.emailAddress,
                 ),
-              ),
 
-              SizedBox(height: 20),
+                buildInput(
+                  label: "Phone",
+                  controller: phoneController,
+                  type: TextInputType.phone,
+                ),
+
+                buildInput(
+                  label: "Password",
+                  controller: passwordController,
+                  isPassword: true,
+                ),
+
+              SizedBox(height: 10),
 
               SizedBox(
                 width: double.infinity,
@@ -116,7 +144,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF4A6CF7),
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 14),
+                    padding: EdgeInsets.symmetric(vertical: 20),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                     ),
