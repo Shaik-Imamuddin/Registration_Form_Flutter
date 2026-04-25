@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -16,29 +17,51 @@ class RegistrationScreenState extends State<RegistrationScreen> {
   String message = "";
   Color messageColor = Colors.red;
 
-  void register() {
+  void showMessage(String msg, Color color) {
+    setState(() {
+      message = msg;
+      messageColor = color;
+    });
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          message = "";
+        });
+      }
+    });
+  }
+
+  void register() async {
     String name = nameController.text.trim();
     String email = emailController.text.trim();
     String phone = phoneController.text.trim();
     String password = passwordController.text.trim();
 
     if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
-      setState(() {
-        message = "All fields are required.";
-        messageColor = Colors.red;
-      });
+      showMessage("All fields are required.", Colors.red);
       return;
     }
 
-    setState(() {
-      message = "Registered successfully!";
-      messageColor = Colors.green;
-    });
+    try {
+      await FirebaseFirestore.instance.collection('users').add({
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'password': password,
+        'createdAt': Timestamp.now(),
+      });
 
-    nameController.clear();
-    emailController.clear();
-    phoneController.clear();
-    passwordController.clear();
+      showMessage("Registered successfully!", Colors.green);
+
+      nameController.clear();
+      emailController.clear();
+      phoneController.clear();
+      passwordController.clear();
+
+    } catch (e) {
+      showMessage("Error: $e", Colors.red);
+    }
   }
 
   Widget buildInput({
@@ -51,20 +74,20 @@ class RegistrationScreenState extends State<RegistrationScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         TextField(
           controller: controller,
           obscureText: isPassword,
           keyboardType: type,
           decoration: InputDecoration(
             contentPadding:
-                EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(5),
             ),
           ),
         ),
-        SizedBox(height: 15),
+        const SizedBox(height: 15),
       ],
     );
   }
@@ -72,15 +95,15 @@ class RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF4F6FB),
+      backgroundColor: const Color(0xFFF4F6FB),
       body: Center(
         child: Container(
           width: 350,
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 10,
@@ -92,7 +115,7 @@ class RegistrationScreenState extends State<RegistrationScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
+              const Center(
                 child: Text(
                   "Registration",
                   style: TextStyle(
@@ -102,8 +125,9 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                 ),
               ),
 
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
 
+              // 🔥 message auto hide works here
               if (message.isNotEmpty)
                 Center(
                   child: Text(
@@ -112,45 +136,46 @@ class RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                 ),
 
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
+
               buildInput(
-                  label: "Name",
-                  controller: nameController,
-                ),
+                label: "Name",
+                controller: nameController,
+              ),
 
-                buildInput(
-                  label: "Email",
-                  controller: emailController,
-                  type: TextInputType.emailAddress,
-                ),
+              buildInput(
+                label: "Email",
+                controller: emailController,
+                type: TextInputType.emailAddress,
+              ),
 
-                buildInput(
-                  label: "Phone",
-                  controller: phoneController,
-                  type: TextInputType.phone,
-                ),
+              buildInput(
+                label: "Phone",
+                controller: phoneController,
+                type: TextInputType.phone,
+              ),
 
-                buildInput(
-                  label: "Password",
-                  controller: passwordController,
-                  isPassword: true,
-                ),
+              buildInput(
+                label: "Password",
+                controller: passwordController,
+                isPassword: true,
+              ),
 
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
 
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF4A6CF7),
+                    backgroundColor: const Color(0xFF4A6CF7),
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 20),
+                    padding: const EdgeInsets.symmetric(vertical: 20),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
                   onPressed: register,
-                  child: Text("Register"),
+                  child: const Text("Register"),
                 ),
               ),
             ],
